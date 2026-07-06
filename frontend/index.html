@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi Chatbot</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+  body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+  }
+  .chat-container {
+    width: 100%;
+    max-width: 450px;
+    height: 650px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .avatar {
+    width: 45px;
+    height: 45px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+  .header-info h3 { font-size: 16px; }
+  .header-info p { font-size: 12px; opacity: 0.9; }
+  .status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .chat-messages {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+    background: #f5f7fb;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .chat-messages::-webkit-scrollbar { width: 6px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+  .message {
+    max-width: 75%;
+    padding: 10px 15px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.4;
+    animation: fadeIn 0.3s ease;
+    word-wrap: break-word;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .bot-message {
+    background: white;
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+  .user-message {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .time {
+    font-size: 10px;
+    opacity: 0.6;
+    margin-top: 4px;
+    display: block;
+  }
+  .typing {
+    display: flex;
+    gap: 4px;
+    padding: 12px 15px;
+    background: white;
+    border-radius: 18px;
+    align-self: flex-start;
+    width: fit-content;
+  }
+  .typing span {
+    width: 8px;
+    height: 8px;
+    background: #999;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite;
+  }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+    30% { transform: translateY(-8px); opacity: 1; }
+  }
+  .chat-input {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 10px;
+  }
+  .chat-input input {
+    flex: 1;
+    padding: 12px 18px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    outline: none;
+    font-size: 14px;
+    transition: border 0.2s;
+  }
+  .chat-input input:focus { border-color: #667eea; }
+  .chat-input button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    transition: transform 0.2s;
+  }
+  .chat-input button:hover { transform: scale(1.1); }
+  .chat-input button:active { transform: scale(0.95); }
+</style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="avatar">🤖</div>
+    <div class="header-info">
+      <h3>Asistente Virtual</h3>
+      <p><span class="status-dot"></span>En línea</p>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chatMessages">
+    <div class="message bot-message">
+      ¡Hola! 👋 Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?
+      <span class="time" id="initTime"></span>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input type="text" id="userInput" placeholder="Escribe un mensaje..." autocomplete="off">
+    <button onclick="enviarMensaje()">➤</button>
+  </div>
+</div>
+
+<script>
+  // Mostrar hora inicial
+  document.getElementById('initTime').textContent = obtenerHora();
+
+  // Base de conocimientos del bot
+  const respuestas = {
+    saludo: {
+      patrones: ['hola', 'buenos dias', 'buenas tardes', 'buenas noches', 'hey', 'hi', 'saludos'],
+      respuesta: '¡Hola! 😊 ¿Cómo estás hoy?'
+    },
+    como_estas: {
+      patrones: ['como estas', 'qué tal', 'como te va', 'que tal'],
+      respuesta: '¡Muy bien, gracias por preguntar! 🌟 ¿Y tú?'
+    },
+    nombre: {
+      patrones: ['tu nombre', 'quien eres', 'como te llamas'],
+      respuesta: 'Soy un asistente virtual creado con HTML y JavaScript 🤖'
+    },
+    hora: {
+      patrones: ['hora', 'que hora es', 'dime la hora'],
+      respuesta: () => `Son las ${obtenerHora()} ⏰`
+    },
+    fecha: {
+      patrones: ['fecha', 'que dia es', 'dia de hoy'],
+      respuesta: () => `Hoy es ${new Date().toLocaleDateString('es-ES', {weekday:'long', year:'numeric', month:'long', day:'numeric'})} 📅`
+    },
+    ayuda: {
+      patrones: ['ayuda', 'help', 'que puedes hacer', 'opciones'],
+      respuesta: 'Puedo ayudarte con:\n• Saludos 👋\n• Decirte la hora ⏰\n• Decirte la fecha 📅\n• Contar chistes 😄\n• Hablar del clima 🌤️\n\n¡Pruébame!'
+    },
+    chiste: {
+      patrones: ['chiste', 'cuentame un chiste', 'algo gracioso'],
+      respuesta: () => {
+        const chistes = [
+          '¿Por qué los pájaros no usan Facebook? Porque ya tienen Twitter 🐦',
+          '¿Qué hace una abeja en el gimnasio? ¡Zumba! 🐝',
+          '¿Cómo se despiden los químicos? Ácido un placer 🧪'
+        ];
+        return chistes[Math.floor(Math.random() * chistes.length)];
+      }
+    },
+    clima: {
+      patrones: ['clima', 'tiempo', 'temperatura', 'lluvia'],
+      respuesta: 'No tengo acceso a datos en tiempo real, pero te recomiendo consultar tu app del clima favorita 🌤️'
+    },
+    gracias: {
+      patrones: ['gracias', 'thanks', 'te agradezco'],
+      respuesta: '¡De nada! 😊 Estoy aquí para ayudarte cuando lo necesites.'
+    },
+    adios: {
+      patrones: ['adios', 'chao', 'hasta luego', 'bye', 'nos vemos'],
+      respuesta: '¡Hasta luego! 👋 Fue un placer charlar contigo.'
+    }
+  };
+
+  function obtenerHora() {
+    return new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit'});
+  }
+
+  function agregarMensaje(texto, tipo) {
+    const contenedor = document.getElementById('chatMessages');
+    const msg = document.createElement('div');
+    msg.className = `message ${tipo}-message`;
+    msg.innerHTML = `${texto.replace(/\n/g, '<br>')}<span class="time">${obtenerHora()}</span>`;
+    contenedor.appendChild(msg);
+    contenedor.scrollTop = contenedor.scrollHeight;
+  }
+
+  function mostrarEscribiendo() {
+    const contenedor = document.getElementById('chatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    contenedor.appendChild(typing);
+    contenedor.scrollTop = contenedor.scrollHeight;
+  }
+
+  function quitarEscribiendo() {
+    const t = document.getElementById('typingIndicator');
+    if (t) t.remove();
+  }
+
+  // ───── Conexión con el backend RAG real ─────
+  const API_URL = 'http://localhost:8000/api/chat';
+  const sessionId = 'session-' + Date.now();
+
+  async function consultarRAG(pregunta) {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pregunta, session_id: sessionId, top_k: 5 })
+      });
+      if (!response.ok) throw new Error('Error de servidor: ' + response.status);
+      return await response.json(); // { respuesta, fuentes, session_id, modelo_usado }
+    } catch (err) {
+      return {
+        respuesta: 'No se pudo conectar con el backend (' + err.message + '). Verifica que la API esté corriendo en ' + API_URL,
+        fuentes: []
+      };
+    }
+  }
+
+  function mostrarFuentes(fuentes) {
+    let panel = document.getElementById('sourcesPanel');
+    if (!fuentes || fuentes.length === 0) {
+      if (panel) panel.remove();
+      return;
+    }
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'sourcesPanel';
+      panel.style.cssText = 'padding:8px 20px;background:#f5f7fb;font-size:11px;border-top:1px solid #eee;';
+      document.querySelector('.chat-input').insertAdjacentElement('beforebegin', panel);
+    }
+    panel.innerHTML = '<strong>Fuentes:</strong> ' + fuentes.map(f =>
+      `<span style="display:inline-block;background:#fff;border:1px solid #ddd;border-radius:4px;padding:2px 6px;margin:2px;">${f.documento} (${(f.similitud*100).toFixed(0)}%)</span>`
+    ).join('');
+  }
+
+  async function enviarMensaje() {
+    const input = document.getElementById('userInput');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    agregarMensaje(texto, 'user');
+    input.value = '';
+
+    mostrarEscribiendo();
+    const data = await consultarRAG(texto);
+    quitarEscribiendo();
+    agregarMensaje(data.respuesta, 'bot');
+    mostrarFuentes(data.fuentes);
+  }
+
+  // Enviar con Enter
+  document.getElementById('userInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') enviarMensaje();
+  });
+</script>
+
+</body>
+</html>
