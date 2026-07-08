@@ -65,8 +65,8 @@ trabajo antes de que el siguiente rol comience. Si un rol depende de otro,
 **no avances hasta que el rol anterior haya subido su parte a GitHub.**
 
 ```
-Día 1:     Rol 1 → Ya completado: repo creado, código subido, estructura lista
-           Rol 1 → Pendiente: proteger rama main, crear Issues
+Día 1:     Rol 1 → Ya completado: repo creado, código subido, estructura lista,
+                    rama main protegida, Issues creados
 Día 1-2:   Rol 2 → Obtiene documentos, implementa ingesta y chunking
 Día 2-3:   Rol 3 → Configura embeddings, base vectorial, indexación
 Día 3-4:   Rol 4 → Implementa el motor RAG + integración LLM
@@ -294,8 +294,8 @@ Al final del proyecto, verifica que:
 
 - [x] Repositorio GitHub creado con estructura correcta
 - [x] Código base subido y compilado (uv init, uv add)
-- [ ] Issues creados y asignados
-- [ ] Rama `main` protegida
+- [x] Issues creados y asignados
+- [x] Rama `main` protegida
 - [ ] Pull Requests de compañeros revisados y mergeados
 - [ ] Sistema completo integrado y funcional
 
@@ -745,64 +745,18 @@ for f in resultado['fuentes']:
 "
 ```
 
-#### Paso 7: Configurar parámetros avanzados del LLM
+#### Paso 7: Verificar los parámetros del LLM
 
-En `backend/app/services/llm_service.py`, asegúrate de que el archivo
-tenga implementados correctamente todos los proveedores.
+En `backend/app/services/llm_service.py` YA están implementados todos los proveedores
+con sus parámetros (temperature, max_tokens). Solo debes **verificar** que el archivo
+contenga correctamente las implementaciones de Ollama, OpenAI, Anthropic y DeepSeek.
 
-**Para Ollama**, modifica `_generar_ollama()`:
+El código de referencia (ya incluido en el proyecto, no necesitas modificarlo).
 
-```python
-def _generar_ollama(prompt: str) -> str:
-    """Requiere Ollama corriendo localmente: https://ollama.ai"""
-    import requests
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": settings.llm_model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {
-                "temperature": 0.3,      # Baja = más preciso, menos creativo
-                "num_predict": 1024,     # Máximo de tokens en respuesta
-            }
-        },
-    )
-    return response.json()["response"]
-```
-
-**Si usas DeepSeek**, agrega esta función NUEVA al archivo `llm_service.py`
-(DeepSeek usa el mismo formato de API que OpenAI, así que puedes usar la
-librería `openai` con otro `base_url`):
-
-```python
-def _generar_deepseek(prompt: str) -> str:
-    """DeepSeek API — compatible con formato OpenAI."""
-    from openai import OpenAI
-    client = OpenAI(
-        api_key=settings.llm_api_key,
-        base_url="https://api.deepseek.com"
-    )
-    respuesta = client.chat.completions.create(
-        model=settings.llm_model,       # ej: "deepseek-chat"
-        temperature=0.3,
-        max_tokens=1024,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return respuesta.choices[0].message.content
-```
-
-Y en la función `generar_respuesta()` del mismo archivo, agrega el caso:
-
-```python
-elif settings.llm_provider == "deepseek":
-    return _generar_deepseek(prompt)
-```
-
-> **Nota para DeepSeek:** Necesitas descomentar la línea `openai` en
-> `backend/requirements.txt` (cambiar `# openai==1.47.0` a `openai==1.47.0`),
-> ya que DeepSeek usa la misma librería cliente que OpenAI. Luego ejecuta
-> `uv add -r requirements.txt` de nuevo.
+> **Nota para DeepSeek:** La librería `openai` ya está incluida en
+> `requirements.txt` y se instala automáticamente con `uv add -r requirements.txt`.
+> DeepSeek usa la misma librería cliente que OpenAI, por lo que no necesitas
+> instalar nada adicional.
 
 #### Paso 8: Commit y Push
 
