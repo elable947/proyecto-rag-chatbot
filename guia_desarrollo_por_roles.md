@@ -1,12 +1,46 @@
 # Guía de Desarrollo por Roles — Chatbot RAG MIT Sloan
 
-> **Instrucciones para cada estudiante:** Busca tu número de rol en el
-> índice y sigue ÚNICAMENTE las instrucciones de tu sección. Entrega este
-> mismo archivo como contexto a tu agente de IA (opencode, Cursor, Copilot,
-> etc.) junto con tu número de rol.
+> **EL REPOSITORIO YA ESTÁ CREADO Y CLONADO POR TODOS.**
 >
-> **Ejemplo:** "Mi rol es el número 5 @guia_desarrollo_por_roles.md,
-> ayúdame a desarrollar el proyecto."
+> **Instrucciones para cada estudiante:**
+> 1. Abre la carpeta `proyecto-rag-chatbot` en tu editor (VS Code o similar).
+>    - La carpeta puede estar en cualquier ubicación de tu laptop (`C:\Users\...\Desktop`, `D:\proyectos\`, etc.).
+>    - Lo importante es que estés DENTRO de la carpeta del proyecto al abrir el editor.
+> 2. Abre una terminal integrada en el editor (en VS Code: `` Ctrl+ñ `` o `` Ctrl+` ``).
+> 3. Ejecuta tu agente de IA:
+>    - **opencode:** escribe `opencode` en la terminal
+>    - **Cursor:** usa `Ctrl+K` o `Ctrl+L`
+>    - **Copilot:** usa el chat lateral
+> 4. Dale esta instrucción exacta a tu agente:
+>
+>    **"Mi rol es el número X @guia_desarrollo_por_roles.md, ayúdame a desarrollar el proyecto."**
+>
+> ---
+>
+> **IMPORTANTE — Lo que el agente DEBE hacer antes de tocar código:**
+>
+> El agente de IA debe seguir esta secuencia ANTES de modificar cualquier archivo:
+>
+> 1. **Entender el rol:** Leer la sección de este archivo que corresponde al número de rol indicado.
+> 2. **Analizar el estado del repositorio:** Ejecutar `git status`, `git branch -a`, `git log --oneline -5` y `git pull origin main` para ver ramas existentes, últimos cambios y asegurarse de tener la versión más reciente.
+> 3. **Explorar el proyecto:** Revisar los archivos y carpetas relevantes para el rol asignado (usar `ls` o `dir`, leer archivos clave como `README.md`, `.env.example`, `requirements.txt`, etc.).
+> 4. **Presentar el plan al estudiante:** Mostrar un resumen claro de:
+>    - Lo que ya está hecho en el repositorio
+>    - Lo que falta por hacer para este rol
+>    - Los archivos que se van a modificar o crear
+>    - Los comandos que se van a ejecutar
+> 5. **Preguntar antes de proceder:** El agente debe preguntar explícitamente al estudiante: *"¿Procedo con estos cambios?"* o *"¿Quieres que revise algo más antes de empezar?"*
+> 6. **Ejecutar los cambios** solo después de recibir confirmación del estudiante.
+>
+> ---
+>
+> **IMPORTANTE — Lo que el agente DEBE hacer antes de subir a GitHub:**
+>
+> 1. **Revisar los cambios realizados:** Ejecutar `git status` y `git diff` para mostrar exactamente qué archivos cambiaron.
+> 2. **Mostrar el resumen al estudiante:** Listar los archivos modificados/creados y el mensaje de commit propuesto.
+> 3. **Preguntar antes de hacer commit y push:** *"¿Confirmo estos cambios y los subo a GitHub?"*
+> 4. **Solo después de recibir confirmación:** ejecutar `git add`, `git commit` y `git push`.
+> 5. **Recordar al estudiante** que debe crear un Pull Request en GitHub y avisar al Líder Técnico (Rol 1).
 
 ---
 
@@ -31,13 +65,14 @@ trabajo antes de que el siguiente rol comience. Si un rol depende de otro,
 **no avances hasta que el rol anterior haya subido su parte a GitHub.**
 
 ```
-Día 1-2:   Rol 1 → Crea el repositorio, estructura, ramas, CI/CD básico
-Día 2-3:   Rol 2 → Obtiene documentos, implementa ingesta y chunking
-Día 3-4:   Rol 3 → Configura embeddings, base vectorial, indexación
-Día 4-5:   Rol 4 → Implementa el motor RAG + integración LLM
-Día 4-6:   Rol 5 → Implementa la API REST completa (puede iniciar antes si usa mocks)
-Día 5-7:   Rol 6 → Desarrolla el frontend con identidad MIT Sloan
-Día 5-8:   Rol 7 → Pruebas, documentación, despliegue, presentación
+Día 1:     Rol 1 → Ya completado: repo creado, código subido, estructura lista
+           Rol 1 → Pendiente: proteger rama main, crear Issues
+Día 1-2:   Rol 2 → Obtiene documentos, implementa ingesta y chunking
+Día 2-3:   Rol 3 → Configura embeddings, base vectorial, indexación
+Día 3-4:   Rol 4 → Implementa el motor RAG + integración LLM
+Día 4-5:   Rol 5 → Implementa la API REST completa
+Día 5-6:   Rol 6 → Desarrolla el frontend con identidad MIT Sloan
+Día 6-7:   Rol 7 → Pruebas, documentación, despliegue, presentación
 Día 7-8:   TODOS → Integración final, pruebas end-to-end, presentación
 ```
 
@@ -55,34 +90,55 @@ main          ← solo Rol 1 toca esta rama al inicio
 
 ### Flujo de trabajo para cada rol
 
-```bash
-# 1. Clonar el repo (solo Rol 1 lo crea; los demás clonan)
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
-cd proyecto-rag-chatbot
+El agente de IA seguirá esta secuencia automáticamente al recibir el archivo:
 
-# 2. Crear tu rama de trabajo
+```bash
+# ─── FASE 1: ANÁLISIS INICIAL (el agente hace esto primero) ───
+
+# a) Revisar estado del repositorio
+git status
+git branch -a
+git log --oneline -5
+git pull origin main          # Traer últimos cambios de los compañeros
+
+# b) Explorar el proyecto (el agente lee archivos clave)
+ls -la                         # Ver estructura general
+# El agente lee README.md, requirements.txt, .env.example, etc.
+
+# c) Mostrar plan al estudiante:
+#    "Esto es lo que haré: [lista de tareas del rol X]"
+#    "Estos archivos modificaré: [archivos]"
+#    "¿Procedo?"
+
+# ─── FASE 2: EJECUCIÓN (solo después de confirmación) ───
+
+# d) Crear rama de trabajo
+git checkout main
+git pull origin main
 git checkout -b feature/tu-rama
 
-# 3. Hacer tus cambios (editar archivos, crear nuevos...)
+# e) El agente realiza los cambios en los archivos
 
-# 4. Ver qué cambiaste
+# ─── FASE 3: REVISIÓN Y SUBIDA (el agente pregunta antes) ───
+
+# f) Revisar cambios
 git status
 git diff
 
-# 5. Agregar y confirmar cambios
-git add .
-git commit -m "feat(Rol X): descripcion breve de lo que hiciste"
+# g) Mostrar resumen al estudiante:
+#    "Estos son los archivos modificados: [archivos]"
+#    "Mensaje de commit: feat(Rol X): descripción"
+#    "¿Confirmo y subo a GitHub?"
 
-# 6. Subir tu rama a GitHub
+# h) Commit y push (solo después de confirmación)
+git add .
+git commit -m "feat(Rol X): descripcion de los cambios realizados"
 git push -u origin feature/tu-rama
 
-# 7. Crear Pull Request en GitHub (desde la web de GitHub)
-#    - Ve a la página del repo en GitHub
-#    - Haz clic en "Pull Requests" > "New Pull Request"
-#    - Selecciona tu rama y compárala con main
-#    - Escribe una descripción de tus cambios
-#    - Haz clic en "Create Pull Request"
-#    - AVISA al Líder Técnico (Rol 1) para que revise y haga merge
+# i) Recordatorio final del agente:
+#    "Ahora ve a https://github.com/elable947/proyecto-rag-chatbot
+#     Crea un Pull Request desde tu rama 'feature/tu-rama' hacia 'main'
+#     Avisa al Líder Técnico (Rol 1) para que lo revise."
 ```
 
 ---
@@ -133,53 +189,16 @@ git config --global user.email "tu-correo@universidad.edu.pe"
 
 ### ROL 1: Líder Técnico y Arquitecto de Software
 
-**ERES EL PRIMERO EN TRABAJAR. NADIE MÁS TOCA EL REPOSITORIO HASTA QUE TÚ TERMINES.**
+**EL REPOSITORIO YA ESTÁ CREADO. ERES EL RESPONSABLE DE GESTIONARLO.**
 
-#### Paso 1: Crear el repositorio en GitHub
+#### Paso 0: Lo que ya está hecho
 
-1. Inicia sesión en https://github.com
-2. Haz clic en el botón "+" (esquina superior derecha) > "New repository"
-3. Configura:
-   - **Repository name:** `proyecto-rag-chatbot`
-   - **Description:** `Chatbot RAG con identidad MIT Sloan — Proyecto Final IA`
-   - **Visibility:** Public
-   - NO marcar "Add a README file" (ya existe en el código base)
-   - NO marcar ".gitignore" (ya existe)
-   - NO marcar "license"
-4. Haz clic en "Create repository"
-5. **IMPORTANTE:** Anota la URL del repo (algo como `https://github.com/tu-usuario/proyecto-rag-chatbot.git`). Compártela con TODO el equipo.
+- [x] Repositorio creado en https://github.com/elable947/proyecto-rag-chatbot
+- [x] Código base subido a `main`
+- [x] `.gitignore`, `README.md`, estructura de carpetas
+- [x] `pyproject.toml` y `uv.lock` en `backend/`
 
-#### Paso 2: Inicializar el repositorio local y subir el código base
-
-Abre PowerShell en la carpeta `D:\ia\unidad3\proyecto-rag-chatbot` y ejecuta:
-
-```bash
-# Inicializar git en la carpeta del proyecto
-git init
-
-# Agregar el repositorio remoto (cambia la URL por la tuya)
-git remote add origin https://github.com/elable947/proyecto-rag-chatbot.git
-
-# Verificar que los archivos .gitignore y README.md existen
-git status
-
-# Agregar todos los archivos
-git add .
-
-# Primer commit
-git commit -m "chore: inicializar estructura del proyecto chatbot RAG"
-
-# Subir a GitHub (la primera vez pide usuario y token)
-git push -u origin main
-```
-
-> **Nota sobre autenticación en GitHub:** Si pide contraseña, necesitas un
-> "Personal Access Token" (PAT), no tu contraseña normal. Para crearlo:
-> GitHub > Settings > Developer settings > Personal access tokens >
-> Tokens (classic) > Generate new token > Marcar "repo" > Generate.
-> Copia el token y úsalo como contraseña.
-
-#### Paso 3: Configurar la protección de la rama main
+#### Paso 1: Configurar la protección de la rama main
 
 1. En GitHub, ve a tu repo > Settings > Branches
 2. En "Branch protection rules" > Add rule
@@ -188,7 +207,7 @@ git push -u origin main
 5. Marcar "Require approvals" (1 approval)
 6. Save changes
 
-#### Paso 4: Crear el tablero de Issues en GitHub
+#### Paso 2: Crear el tablero de Issues en GitHub
 
 Crea los siguientes Issues (cada uno asignado al rol correspondiente):
 
@@ -199,19 +218,23 @@ Crea los siguientes Issues (cada uno asignado al rol correspondiente):
 5. "Crear frontend con identidad MIT Sloan" → label `rol-6`
 6. "Pruebas, documentación y despliegue" → label `rol-7`
 
-#### Paso 5: Verificar la estructura del repositorio
+#### Paso 3: Verificar la estructura del repositorio
 
 Asegúrate de que tu repo tenga exactamente esta estructura de carpetas y
-archivos después del push inicial:
+archivos:
 
 ```
 proyecto-rag-chatbot/
 ├── .gitignore
 ├── README.md
+├── guia_desarrollo_por_roles.md
 ├── Plantilla_modelo.html
 ├── backend/
 │   ├── .env.example
+│   ├── .python-version
+│   ├── pyproject.toml
 │   ├── requirements.txt
+│   ├── uv.lock
 │   ├── tests/
 │   │   └── test_api.py
 │   └── app/
@@ -247,7 +270,7 @@ proyecto-rag-chatbot/
     └── ingest.py
 ```
 
-#### Paso 6: Revisar y hacer merge de los Pull Requests
+#### Paso 4: Revisar y hacer merge de los Pull Requests
 
 A medida que tus compañeros creen Pull Requests:
 
@@ -257,7 +280,7 @@ A medida que tus compañeros creen Pull Requests:
 4. Haz clic en "Confirm merge"
 5. Opcional: "Delete branch" después del merge
 
-#### Paso 7: Integración final
+#### Paso 5: Integración final
 
 Al final del proyecto, verifica que:
 
@@ -269,7 +292,8 @@ Al final del proyecto, verifica que:
 
 #### Entregables del Rol 1
 
-- [ ] Repositorio GitHub creado con estructura correcta
+- [x] Repositorio GitHub creado con estructura correcta
+- [x] Código base subido y compilado (uv init, uv add)
 - [ ] Issues creados y asignados
 - [ ] Rama `main` protegida
 - [ ] Pull Requests de compañeros revisados y mergeados
@@ -279,7 +303,16 @@ Al final del proyecto, verifica que:
 
 ### ROL 2: Especialista en Ingesta y Procesamiento de Datos
 
-**ESPERA A QUE EL ROL 1 HAYA CREADO EL REPOSITORIO EN GITHUB ANTES DE EMPEZAR.**
+**EL REPOSITORIO YA ESTÁ CLONADO EN TU MÁQUINA. SOLO TIENES QUE CREAR TU RAMA Y EMPEZAR.**
+
+#### Paso 1: Crear tu rama de trabajo
+
+```bash
+cd proyecto-rag-chatbot
+git checkout main
+git pull origin main
+git checkout -b feature/ingesta-datos
+```
 
 #### Lo que ya existe en el código base (NO necesitas crearlo de cero)
 
@@ -287,14 +320,6 @@ Al final del proyecto, verifica que:
 - `scripts/ingest.py` — script para ingesta masiva
 - `backend/app/routers/documents.py` — endpoint de carga de documentos
 - `backend/requirements.txt` — dependencias listas
-
-#### Paso 1: Clonar el repositorio
-
-```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
-cd proyecto-rag-chatbot
-git checkout -b feature/ingesta-datos
-```
 
 #### Paso 2: Instalar dependencias de Python
 
@@ -451,10 +476,10 @@ git push
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
+git checkout main
+git pull origin main
 git checkout -b feature/embeddings-vectordb
-git pull origin main  # IMPORTANTE: traer los cambios del Rol 2
 ```
 
 #### Paso 2: Instalar dependencias
@@ -609,10 +634,10 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
-git checkout -b feature/motor-rag
+git checkout main
 git pull origin main
+git checkout -b feature/motor-rag
 ```
 
 #### Paso 2: Instalar dependencias y configurar
@@ -818,10 +843,10 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
-git checkout -b feature/api-rest
+git checkout main
 git pull origin main
+git checkout -b feature/api-rest
 ```
 
 #### Paso 2: Instalar dependencias
@@ -990,10 +1015,10 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
-git checkout -b feature/frontend-mit
+git checkout main
 git pull origin main
+git checkout -b feature/frontend-mit
 ```
 
 #### Paso 2: Elegir tecnología
@@ -1136,10 +1161,10 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
-git checkout -b feature/docs-despliegue
+git checkout main
 git pull origin main
+git checkout -b feature/docs-despliegue
 ```
 
 #### Paso 2: Ejecutar y verificar todas las pruebas
