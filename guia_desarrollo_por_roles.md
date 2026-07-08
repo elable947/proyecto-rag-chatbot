@@ -57,7 +57,7 @@ main          ← solo Rol 1 toca esta rama al inicio
 
 ```bash
 # 1. Clonar el repo (solo Rol 1 lo crea; los demás clonan)
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 
 # 2. Crear tu rama de trabajo
@@ -158,7 +158,7 @@ Abre PowerShell en la carpeta `D:\ia\unidad3\proyecto-rag-chatbot` y ejecuta:
 git init
 
 # Agregar el repositorio remoto (cambia la URL por la tuya)
-git remote add origin https://github.com/TU-USUARIO/proyecto-rag-chatbot.git
+git remote add origin https://github.com/elable947/proyecto-rag-chatbot.git
 
 # Verificar que los archivos .gitignore y README.md existen
 git status
@@ -291,7 +291,7 @@ Al final del proyecto, verifica que:
 #### Paso 1: Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/ingesta-datos
 ```
@@ -451,7 +451,7 @@ git push
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/embeddings-vectordb
 git pull origin main  # IMPORTANTE: traer los cambios del Rol 2
@@ -609,7 +609,7 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/motor-rag
 git pull origin main
@@ -818,7 +818,7 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/api-rest
 git pull origin main
@@ -990,7 +990,7 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/frontend-mit
 git pull origin main
@@ -1136,7 +1136,7 @@ Crea Pull Request hacia `main`. Avisa al Rol 1.
 #### Paso 1: Preparar tu entorno
 
 ```bash
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 git checkout -b feature/docs-despliegue
 git pull origin main
@@ -1261,7 +1261,7 @@ Crea `docs/manual_instalacion.md`:
 ## Instalación paso a paso
 
 ### 1. Clonar el repositorio
-git clone https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot.git
+git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 
 ### 2. Configurar backend
@@ -1419,7 +1419,7 @@ No estás en la carpeta correcta. Ejecuta `cd proyecto-rag-chatbot` primero.
 ### Error: "Permission denied (publickey)"
 Tu clave SSH no está configurada. Usa HTTPS para clonar en vez de SSH:
 ```bash
-git remote set-url origin https://github.com/TU-USUARIO/proyecto-rag-chatbot.git
+git remote set-url origin https://github.com/elable947/proyecto-rag-chatbot.git
 ```
 
 ### Error: "ModuleNotFoundError: No module named 'app'"
@@ -1439,7 +1439,7 @@ Descárgalos de Google Drive y cópialos ahí (ver Rol 2, Paso 3).
 
 | Recurso | URL |
 |----------|-----|
-| Repositorio GitHub | https://github.com/TU-USUARIO-GRUPO/proyecto-rag-chatbot |
+| Repositorio GitHub | https://github.com/elable947/proyecto-rag-chatbot |
 | Documentos Azure | https://drive.google.com/file/d/1jSTZYo0YGBLr5GOkFtBC0ws2zLS2DLMo |
 | Guía de marca MIT Sloan | https://mitsloan.mit.edu/brand-guidelines/color-typography-photography |
 | Documentación FastAPI | https://fastapi.tiangolo.com/ |
