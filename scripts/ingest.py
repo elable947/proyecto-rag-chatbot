@@ -5,9 +5,11 @@ y los indexa en la base vectorial.
 Ejecutar desde la raíz del proyecto:
     python scripts/ingest.py
 """
+import io
 import sys
 from pathlib import Path
 
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.path.append(str(Path(__file__).parent.parent / "backend"))
 
 from app.services import ingest_service
@@ -31,7 +33,7 @@ def main():
         contenido = archivo.read_bytes()
         resultado = ingest_service.procesar_documento(archivo.name, contenido)
         total_chunks += resultado["chunks_generados"]
-        print(f"  ✓ {archivo.name} → {resultado['chunks_generados']} chunks")
+        print(f"  OK {archivo.name} -> {resultado['chunks_generados']} chunks")
 
     print(f"\nIngesta completada: {len(archivos)} documentos, {total_chunks} chunks totales.")
 

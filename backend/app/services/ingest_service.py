@@ -55,5 +55,14 @@ def dividir_en_chunks(texto: str) -> list[str]:
 
 
 def listar_documentos_indexados() -> dict:
-    """TODO: consultar metadatos únicos almacenados en la base vectorial."""
-    return {"documentos": [], "nota": "Implementar consulta de metadatos en vector_store_service"}
+    """Devuelve la lista de documentos únicos indexados en la base vectorial."""
+    from app.services.vector_store_service import _cliente
+    coleccion = _cliente()
+    resultados = coleccion.get()
+    documentos_unicos = list(set(
+        m.get("documento", "desconocido") for m in resultados.get("metadatas", [])
+    ))
+    return {
+        "documentos": documentos_unicos,
+        "total_chunks": len(resultados.get("ids", [])) if resultados.get("ids") else 0,
+    }
