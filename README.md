@@ -109,10 +109,11 @@ Prueba manual rapida con curl — ver `docs/pruebas_api.md`.
 
 - [x] Estructura base
 - [x] Soporte multi-LLM (Ollama, DeepSeek, OpenAI, Anthropic)
-- [ ] Ingesta y chunking
-- [ ] Embeddings + base vectorial
-- [ ] Endpoint `/api/chat`
-- [ ] Frontend conectado a la API
-- [ ] Panel de fuentes RAG
-- [ ] Pruebas de API
-- [ ] Informe tecnico
+- [x] Ingesta y chunking (Rol 2 — 21 docs, 883 chunks)
+- [x] Embeddings + base vectorial (Rol 3 — ChromaDB + BAAI/bge-m3)
+- [ ] Motor RAG e integracion LLM (Rol 4)
+- [ ] Endpoint `/api/chat` (Rol 5)
+- [ ] Frontend conectado a la API (Rol 6)
+- [ ] Panel de fuentes RAG (Rol 6)
+- [ ] Pruebas, documentacion y despliegue (Rol 7)
+- [ ] Informe tecnico (Rol 7)

@@ -1,5 +1,5 @@
 """
-Invocación al modelo de lenguaje. Soporta Anthropic, OpenAI, Ollama y DeepSeek.
+Invocación al modelo de lenguaje. Soporta Anthropic, OpenAI, Ollama, DeepSeek y Google Gemini.
 """
 from app.core.config import settings
 
@@ -13,6 +13,8 @@ def generar_respuesta(prompt: str) -> str:
         return _generar_openai(prompt)
     elif settings.llm_provider == "deepseek":
         return _generar_deepseek(prompt)
+    elif settings.llm_provider == "google":
+        return _generar_google(prompt)
     else:
         raise ValueError(f"Proveedor LLM no soportado: {settings.llm_provider}")
 
@@ -72,3 +74,15 @@ def _generar_deepseek(prompt: str) -> str:
         messages=[{"role": "user", "content": prompt}],
     )
     return respuesta.choices[0].message.content
+
+
+def _generar_google(prompt: str) -> str:
+    """Google Gemini API — usar gemini-2.0-flash como modelo."""
+    import google.generativeai as genai
+    genai.configure(api_key=settings.llm_api_key)
+    model = genai.GenerativeModel(
+        settings.llm_model,
+        generation_config={"temperature": 0.3, "max_output_tokens": 1024},
+    )
+    respuesta = model.generate_content(prompt)
+    return respuesta.text
