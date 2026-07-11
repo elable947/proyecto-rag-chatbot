@@ -12,14 +12,6 @@ router = APIRouter()
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(request: ChatRequest):
-    """
-    Flujo RAG completo:
-    1. Genera el embedding de la pregunta.
-    2. Consulta la base vectorial (Top-K).
-    3. Construye el prompt con el contexto recuperado.
-    4. Invoca al LLM configurado.
-    5. Retorna la respuesta junto con las fuentes utilizadas.
-    """
     try:
         resultado = rag_service.responder_pregunta(
             pregunta=request.pregunta,
@@ -32,5 +24,9 @@ def chat(request: ChatRequest):
             session_id=request.session_id,
             modelo_usado=resultado["modelo_usado"],
         )
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    except ConnectionError as e:
+        raise HTTPException(status_code=503, detail=f"Servicio no disponible: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en el flujo RAG: {e}")

@@ -104,7 +104,17 @@ done
 Permite reportar en el informe técnico el tiempo de respuesta promedio
 del sistema, dato relevante para la sección de resultados.
 
-## 7. Ejecutar las pruebas automatizadas
+## 7. Gestionar sesiones de conversación (`/api/sessions`)
+
+```bash
+# Obtener historial de una sesión
+curl http://localhost:8000/api/sessions/mi-sesion-001
+
+# Eliminar una sesión
+curl -X DELETE http://localhost:8000/api/sessions/mi-sesion-001
+```
+
+## 8. Ejecutar las pruebas automatizadas
 
 ```bash
 cd backend
@@ -119,6 +129,11 @@ test_api.py::test_chat_devuelve_fuentes_con_estructura_correcta PASSED
 test_api.py::test_chat_rechaza_pregunta_vacia PASSED
 test_api.py::test_upload_documento_formato_no_soportado PASSED
 test_api.py::test_chat_responde_en_tiempo_razonable PASSED
+test_api.py::test_listar_documentos PASSED
+test_api.py::test_chat_rechaza_top_k_invalido PASSED
+test_api.py::test_cors_headers PASSED
+test_api.py::test_obtener_historial_sesion PASSED
+test_api.py::test_limpiar_historial_sesion PASSED
 ```
 
 Recomendación: incluir una captura de pantalla de esta salida en el

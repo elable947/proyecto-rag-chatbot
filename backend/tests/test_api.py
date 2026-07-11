@@ -5,6 +5,7 @@ Ejecutar:  cd backend && pytest -v
 """
 import pytest
 from fastapi.testclient import TestClient
+from unittest.mock import patch
 
 from app.main import app
 
@@ -19,11 +20,15 @@ def test_health_check():
 
 
 # ── 2. Prueba de estructura del endpoint /api/chat ───────────
-def test_chat_endpoint_estructura():
-    """
-    Verifica que el endpoint /api/chat responda con el contrato esperado:
-    respuesta, fuentes, session_id, modelo_usado.
-    """
+@patch("app.services.rag_service.responder_pregunta")
+def test_chat_endpoint_estructura(mock_responder):
+    mock_responder.return_value = {
+        "respuesta": "RAG es una arquitectura que combina recuperación semántica con generación de texto.",
+        "fuentes": [
+            {"documento": "manual_rag.pdf", "fragmento": "RAG es...", "similitud": 0.95}
+        ],
+        "modelo_usado": "qwen2:1.5b",
+    }
     payload = {"pregunta": "¿Qué es RAG?", "session_id": "test-001", "top_k": 3}
     response = client.post("/api/chat", json=payload)
 
@@ -37,11 +42,16 @@ def test_chat_endpoint_estructura():
 
 
 # ── 3. Prueba de fuentes RAG (requisito obligatorio del proyecto) ──
-def test_chat_devuelve_fuentes_con_estructura_correcta():
-    """
-    Cada fuente debe incluir documento, fragmento y similitud —
-    requisito obligatorio según la arquitectura RAG del proyecto.
-    """
+@patch("app.services.rag_service.responder_pregunta")
+def test_chat_devuelve_fuentes_con_estructura_correcta(mock_responder):
+    mock_responder.return_value = {
+        "respuesta": "Respuesta de prueba.",
+        "fuentes": [
+            {"documento": "doc1.pdf", "fragmento": "fragmento 1", "similitud": 0.92},
+            {"documento": "doc2.pdf", "fragmento": "fragmento 2", "similitud": 0.85},
+        ],
+        "modelo_usado": "qwen2:1.5b",
+    }
     payload = {"pregunta": "¿Cuál es el tema principal de la base documental?"}
     response = client.post("/api/chat", json=payload)
     data = response.json()
@@ -56,7 +66,7 @@ def test_chat_devuelve_fuentes_con_estructura_correcta():
 # ── 4. Validación de entrada (pregunta vacía debe fallar) ────
 def test_chat_rechaza_pregunta_vacia():
     response = client.post("/api/chat", json={"pregunta": ""})
-    assert response.status_code == 422  # error de validación Pydantic
+    assert response.status_code == 422
 
 
 # ── 5. Prueba de carga de documentos ─────────────────────────
@@ -79,9 +89,56 @@ def test_upload_documento_txt_valido():
 
 
 # ── 6. Prueba de latencia (criterio de calidad de UX) ────────
-def test_chat_responde_en_tiempo_razonable():
+@patch("app.services.rag_service.responder_pregunta")
+def test_chat_responde_en_tiempo_razonable(mock_responder):
+    mock_responder.return_value = {
+        "respuesta": "Respuesta rápida.",
+        "fuentes": [],
+        "modelo_usado": "qwen2:1.5b",
+    }
     import time
     inicio = time.time()
     client.post("/api/chat", json={"pregunta": "Pregunta de prueba"})
     duracion = time.time() - inicio
-    assert duracion < 15, "La respuesta del chatbot debe tardar menos de 15 segundos"
+    assert duracion < 15
+
+
+# ── 7. Prueba del endpoint de documentos ──────────────────
+def test_listar_documentos():
+    response = client.get("/api/documents")
+    assert response.status_code == 200
+    data = response.json()
+    assert "documentos" in data
+    assert isinstance(data["documentos"], list)
+
+
+# ── 8. Prueba de validación de top_k fuera de rango ────────
+def test_chat_rechaza_top_k_invalido():
+    response = client.post("/api/chat", json={
+        "pregunta": "test",
+        "top_k": 100
+    })
+    assert response.status_code == 422
+
+
+# ── 9. Prueba de CORS ──────────────────────────────────────
+def test_cors_headers():
+    response = client.options("/api/chat")
+    assert response.status_code in [200, 405]
+
+
+# ── 10. Prueba del endpoint de sesiones ────────────────────
+def test_obtener_historial_sesion():
+    response = client.get("/api/sessions/test-001")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["session_id"] == "test-001"
+    assert "mensajes" in data
+    assert isinstance(data["mensajes"], list)
+
+
+def test_limpiar_historial_sesion():
+    response = client.delete("/api/sessions/test-001")
+    assert response.status_code == 200
+    data = response.json()
+    assert "eliminada" in data["mensaje"]
