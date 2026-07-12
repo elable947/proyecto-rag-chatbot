@@ -384,6 +384,67 @@
         color: rgba(255,255,255,0.7);
     }
 
+    /* Panel de fuentes RAG */
+    .sources-panel {
+        max-width: 92%;
+        align-self: flex-start;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: -4px;
+    }
+
+    .sources-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--mit-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-left: 2px;
+    }
+
+    .source-card {
+        background: var(--mit-white);
+        border: 1px solid #e2e4e7;
+        border-left: 3px solid var(--mit-red);
+        border-radius: 6px;
+        padding: 8px 10px;
+    }
+
+    .source-card-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 4px;
+    }
+
+    .source-doc {
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--mit-navy);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .source-sim {
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--mit-red);
+        background: #fbeaed;
+        padding: 2px 7px;
+        border-radius: 10px;
+        flex-shrink: 0;
+    }
+
+    .source-chunk {
+        font-family: Georgia, serif;
+        font-size: 12px;
+        color: var(--mit-gray);
+        line-height: 1.4;
+    }
+
     .typing-indicator {
         display: flex;
         gap: 4px;
@@ -766,6 +827,13 @@
         renderHistorial();
     }
 
+    const STOPWORDS = new Set([
+        'que', 'qué', 'como', 'cómo', 'cual', 'cuál', 'cuales', 'cuáles', 'para', 'por', 'con',
+        'los', 'las', 'del', 'una', 'unos', 'unas', 'esta', 'esto', 'estos', 'esas', 'esos',
+        'sobre', 'donde', 'dónde', 'cuando', 'cuándo', 'tiene', 'tienen', 'hay', 'the', 'and',
+        'for', 'what', 'how', 'son', 'ser', 'este', 'entre', 'desde', 'hasta', 'cada'
+    ]);
+
     // ═══════════════ Render de mensajes ═══════════════
     function renderHistorial() {
         const container = document.getElementById('chatMessages');
@@ -791,6 +859,10 @@
             container.appendChild(qr);
         }
 
+        if (msg.fuentes && msg.fuentes.length) {
+            renderFuentes(msg.fuentes, msg.pregunta);
+        }
+
         if (msg.type === 'error' && msg.retryPregunta) {
             const retryWrap = document.createElement('div');
             retryWrap.className = 'quick-replies';
@@ -804,6 +876,49 @@
         }
 
         container.scrollTop = container.scrollHeight;
+    }
+
+    function renderFuentes(fuentes, pregunta) {
+        const container = document.getElementById('chatMessages');
+        const panel = document.createElement('div');
+        panel.className = 'sources-panel';
+
+        const title = document.createElement('div');
+        title.className = 'sources-title';
+        title.textContent = `📎 ${fuentes.length} fuente${fuentes.length > 1 ? 's' : ''} documental${fuentes.length > 1 ? 'es' : ''}`;
+        panel.appendChild(title);
+
+        fuentes.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'source-card';
+            const similitudPct = (f.similitud * 100).toFixed(1);
+            const fragmento = (f.fragmento || '').slice(0, 150);
+            const fragmentoResaltado = highlightTerms(escapeHtml(fragmento), pregunta);
+            card.innerHTML = `
+                <div class="source-card-head">
+                    <span class="source-doc" title="${escapeHtml(f.documento)}">📄 ${escapeHtml(f.documento)}</span>
+                    <span class="source-sim">${similitudPct}%</span>
+                </div>
+                <p class="source-chunk">${fragmentoResaltado}${(f.fragmento || '').length > 150 ? '…' : ''}</p>
+            `;
+            panel.appendChild(card);
+        });
+
+        container.appendChild(panel);
+    }
+
+    function highlightTerms(escapedFragment, pregunta) {
+        const palabras = [...new Set(
+            (pregunta || '')
+                .toLowerCase()
+                .replace(/[^\p{L}\p{N}\s]/gu, ' ')
+                .split(/\s+/)
+                .filter(w => w.length > 3 && !STOPWORDS.has(w))
+        )];
+        if (!palabras.length) return escapedFragment;
+
+        const patron = new RegExp('(' + palabras.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|') + ')', 'gi');
+        return escapedFragment.replace(patron, '<mark>$1</mark>');
     }
 
     function escapeHtml(str) {
