@@ -77,12 +77,14 @@ def _generar_deepseek(prompt: str) -> str:
 
 
 def _generar_google(prompt: str) -> str:
-    """Google Gemini API — usar gemini-2.0-flash como modelo."""
-    import google.generativeai as genai
-    genai.configure(api_key=settings.llm_api_key)
-    model = genai.GenerativeModel(
-        settings.llm_model,
-        generation_config={"temperature": 0.3, "max_output_tokens": 1024},
+    """Google Gemini API — usar gemini-2.0-flash como modelo. SDK: google-genai."""
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=settings.llm_api_key)
+    respuesta = client.models.generate_content(
+        model=settings.llm_model,
+        contents=prompt,
+        config=types.GenerateContentConfig(temperature=0.3, max_output_tokens=1024),
     )
-    respuesta = model.generate_content(prompt)
     return respuesta.text
