@@ -16,7 +16,7 @@ Los resultados muestran que el sistema recupera fuentes relevantes en todas las 
 - **Tema:** Certificación Microsoft Azure
 - **Número de documentos:** 21 documentos del curso Azure
 - **Formatos utilizados:** PDF, DOCX
-- **Total de chunks generados:** 883 chunks
+- **Total de chunks generados:** 377 chunks
 - **Fuente de los documentos:** Curso Azure proporcionado por el docente, almacenados en Google Drive y descargados a `data/raw/`
 
 ## 3. Arquitectura implementada
@@ -56,7 +56,7 @@ tests/test_api.py::test_obtener_historial_sesion PASSED
 tests/test_api.py::test_limpiar_historial_sesion PASSED
 ```
 
-**Resultado: 11 passed, 1 skipped, 1 warning en 2.68s**
+**Resultado: 11 passed, 1 skipped, 1 warning en 3.91s**
 
 ### Pruebas de recuperación semántica
 
