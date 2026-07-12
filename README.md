@@ -5,15 +5,15 @@ desarrollado como Proyecto Final del curso de Modelos de Lenguaje (LLM).
 
 ## Equipo
 
-| Integrante | Rol |
-|---|---|
-| Nombre 1 | Lider Tecnico y Arquitecto de Software |
-| Nombre 2 | Especialista en Ingesta y Procesamiento de Datos |
-| Nombre 3 | Especialista en Embeddings y Base de Datos Vectorial |
-| Nombre 4 | Especialista en Inteligencia Artificial (RAG) |
-| Nombre 5 | Desarrollador Backend |
-| Nombre 6 | Desarrollador Frontend |
-| Nombre 7 | Despliegue, Calidad y Documentacion |
+| Usuario GitHub | Rol |
+|---|---|---|
+| [elable947](https://github.com/elable947) | Lider Tecnico y Arquitecto de Software |
+| [7421907241-eng](https://github.com/7421907241-eng) | Especialista en Ingesta y Procesamiento de Datos |
+| [Fabry-VR](https://github.com/Fabry-VR) | Especialista en Embeddings y Base de Datos Vectorial |
+| [LINOX-EXIT](https://github.com/LINOX-EXIT) | Especialista en Inteligencia Artificial (RAG) |
+| [torrejonlolocj-code](https://github.com/torrejonlolocj-code) | Desarrollador Backend |
+| [nehemiasenoc-tech](https://github.com/nehemiasenoc-tech) | Desarrollador Frontend |
+| [enfermo2x](https://github.com/enfermo2x) | Despliegue, Calidad y Documentacion |
 
 > Ver `guia_desarrollo_por_roles.md` para instrucciones detalladas de cada rol.
 
@@ -98,9 +98,9 @@ Prueba manual rapida con curl — ver `docs/pruebas_api.md`.
 
 | Variable | Descripcion | Ejemplo |
 |---|---|---|
-| `LLM_PROVIDER` | Proveedor del modelo | `ollama` / `deepseek` / `anthropic` / `openai` |
-| `LLM_API_KEY` | API key (no aplica si es Ollama) | `sk-...` |
-| `LLM_MODEL` | Nombre del modelo | `qwen2:1.5b` / `deepseek-chat` |
+| `LLM_PROVIDER` | Proveedor del modelo | `ollama` / `deepseek` / `anthropic` / `openai` / `google` |
+| `LLM_API_KEY` | API key (no aplica si es Ollama) | `sk-...` / `AQ.xxx` (Gemini) |
+| `LLM_MODEL` | Nombre del modelo | `qwen2:1.5b` / `deepseek-chat` / `gemini-2.0-flash` |
 | `EMBEDDING_MODEL` | Modelo de embeddings | `BAAI/bge-m3` |
 | `VECTOR_DB_PATH` | Ruta de ChromaDB | `./data/processed/chroma` |
 | `TOP_K` | Documentos a recuperar | `5` |
@@ -111,9 +111,9 @@ Prueba manual rapida con curl — ver `docs/pruebas_api.md`.
 - [x] Soporte multi-LLM (Ollama, DeepSeek, OpenAI, Anthropic)
 - [x] Ingesta y chunking (Rol 2 — 21 docs, 883 chunks)
 - [x] Embeddings + base vectorial (Rol 3 — ChromaDB + BAAI/bge-m3)
-- [ ] Motor RAG e integracion LLM (Rol 4)
-- [ ] Endpoint `/api/chat` (Rol 5)
-- [ ] Frontend conectado a la API (Rol 6)
-- [ ] Panel de fuentes RAG (Rol 6)
+- [x] Motor RAG e integracion LLM (Rol 4)
+- [x] Endpoint `/api/chat` (Rol 5)
+- [x] Frontend conectado a la API (Rol 6)
+- [x] Panel de fuentes RAG (Rol 6)
 - [ ] Pruebas, documentacion y despliegue (Rol 7)
 - [ ] Informe tecnico (Rol 7)
