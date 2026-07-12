@@ -5,15 +5,15 @@ desarrollado como Proyecto Final del curso de Modelos de Lenguaje (LLM).
 
 ## Equipo
 
-| Usuario GitHub | Rol |
-|---|---|
-| [elable947](https://github.com/elable947) | Lider Tecnico y Arquitecto de Software |
-| [7421907241-eng](https://github.com/7421907241-eng) | Especialista en Ingesta y Procesamiento de Datos |
-| [Fabry-VR](https://github.com/Fabry-VR) | Especialista en Embeddings y Base de Datos Vectorial |
-| [LINOX-EXIT](https://github.com/LINOX-EXIT) | Especialista en Inteligencia Artificial (RAG) |
-| [torrejonlolocj-code](https://github.com/torrejonlolocj-code) | Desarrollador Backend |
-| [nehemiasenoc-tech](https://github.com/nehemiasenoc-tech) | Desarrollador Frontend |
-| [enfermo2x](https://github.com/enfermo2x) | Despliegue, Calidad y Documentacion |
+| Integrante | Usuario GitHub | Rol |
+|---|---|---|---|
+| Abel López | [elable947](https://github.com/elable947) | Líder Técnico y Arquitecto de Software |
+| Jennifer Valery Culquimboz | [7421907241-eng](https://github.com/7421907241-eng) | Especialista en Ingesta y Procesamiento de Datos |
+| Fabricio Vasquez | [Fabry-VR](https://github.com/Fabry-VR) | Especialista en Embeddings y Base de Datos Vectorial |
+| — | [LINOX-EXIT](https://github.com/LINOX-EXIT) | Especialista en Inteligencia Artificial (RAG) |
+| — | [torrejonlolocj-code](https://github.com/torrejonlolocj-code) | Desarrollador Backend |
+| Nehemías Enoc | [nehemiasenoc-tech](https://github.com/nehemiasenoc-tech) | Desarrollador Frontend |
+| — | [enfermo2x](https://github.com/enfermo2x) | Despliegue, Calidad y Documentación |
 
 > Ver `guia_desarrollo_por_roles.md` para instrucciones detalladas de cada rol.
 
@@ -115,5 +115,7 @@ Prueba manual rapida con curl — ver `docs/pruebas_api.md`.
 - [x] Endpoint `/api/chat` (Rol 5)
 - [x] Frontend conectado a la API (Rol 6)
 - [x] Panel de fuentes RAG (Rol 6)
-- [ ] Pruebas, documentacion y despliegue (Rol 7)
-- [ ] Informe tecnico (Rol 7)
+- [x] Pruebas automatizadas (Rol 7 — 11 passed, 1 skipped)
+- [x] Informe técnico completo (Rol 7)
+- [x] Manual de instalación (Rol 7)
+- [x] Presentación final (Rol 7)
