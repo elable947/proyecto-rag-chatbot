@@ -6,7 +6,7 @@ desarrollado como Proyecto Final del curso de Modelos de Lenguaje (LLM).
 ## Equipo
 
 | Usuario GitHub | Rol |
-|---|---|---|
+|---|---|
 | [elable947](https://github.com/elable947) | Lider Tecnico y Arquitecto de Software |
 | [7421907241-eng](https://github.com/7421907241-eng) | Especialista en Ingesta y Procesamiento de Datos |
 | [Fabry-VR](https://github.com/Fabry-VR) | Especialista en Embeddings y Base de Datos Vectorial |
