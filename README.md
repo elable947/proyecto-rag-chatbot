@@ -177,7 +177,7 @@ API_PORT=8000
 La base de datos vectorial (ChromaDB) ya está poblada con **883 chunks** de **21 documentos** sobre Azure. Si necesitas regenerarla o agregar documentos:
 
 **Opción A — Usar la DB existente** (recomendado):  
-Ya está lista en `backend/data/processed/chroma/`. No necesitas hacer nada.
+Ya está lista en `data/processed/chroma/`. No necesitas hacer nada.
 
 **Opción B — Reindexar desde cero:**
 
@@ -292,20 +292,23 @@ curl -X POST http://localhost:8000/api/chat \
 proyecto-rag-chatbot/
 ├── backend/               API REST + motor RAG (FastAPI)
 │   ├── app/
-│   │   ├── routers/       Endpoints (chat, documents, health)
+│   │   ├── routers/       Endpoints (chat, documents, health, sessions)
 │   │   ├── services/      Lógica RAG: embeddings, vector store, LLM
 │   │   ├── models/        Esquemas Pydantic (request/response)
 │   │   └── core/          Configuración, carga de variables de entorno
-│   ├── data/
-│   │   └── processed/     Base de datos ChromaDB (índice vectorial)
 │   └── tests/             Pruebas de la API (pytest)
 ├── frontend/              Interfaz de chat (identidad MIT Sloan)
 │   └── index.html         Aplicación web single-page
 ├── data/
 │   ├── raw/               Documentos originales (PDF, DOCX, TXT)
-│   └── processed/         Chunks procesados (no subir a git)
-├── docs/                  Informe técnico, pruebas API
-│   └── pruebas_api.md     Ejemplos de prueba manual con curl
+│   └── processed/
+│       └── chroma/        Base de datos vectorial (ChromaDB)
+├── docs/                  Informe técnico, pruebas API, manuales
+│   ├── informe_tecnico.md
+│   ├── manual_instalacion.md
+│   ├── manual_usuario.md
+│   ├── presentacion_final.md
+│   └── pruebas_api.md
 ├── scripts/
 │   └── ingest.py          Script de ingesta y chunking
 ├── guia_desarrollo_por_roles.md

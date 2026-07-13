@@ -16,7 +16,7 @@ Los resultados muestran que el sistema recupera fuentes relevantes en todas las 
 - **Tema:** Certificación Microsoft Azure
 - **Número de documentos:** 21 documentos del curso Azure
 - **Formatos utilizados:** PDF, DOCX
-- **Total de chunks generados:** 377 chunks
+- **Total de chunks generados:** 883 chunks
 - **Fuente de los documentos:** Curso Azure proporcionado por el docente, almacenados en Google Drive y descargados a `data/raw/`
 
 ## 3. Arquitectura implementada

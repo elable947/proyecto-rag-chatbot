@@ -76,7 +76,7 @@ API_PORT=8000
 
 ## Paso 4: Poblar la base de datos vectorial
 
-**La base de datos ya está poblada** con 21 documentos (883 chunks) en `backend/data/processed/chroma/`. Puedes saltar este paso.
+**La base de datos ya está poblada** con 21 documentos (883 chunks) en `data/processed/chroma/`. Puedes saltar este paso.
 
 Si necesitas reindexar o agregar documentos:
 

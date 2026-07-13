@@ -230,6 +230,7 @@ proyecto-rag-chatbot/
 ├── guia_desarrollo_por_roles.md
 ├── Plantilla_modelo.html
 ├── backend/
+│   ├── .env
 │   ├── .env.example
 │   ├── .python-version
 │   ├── pyproject.toml
@@ -250,7 +251,8 @@ proyecto-rag-chatbot/
 │       │   ├── __init__.py
 │       │   ├── chat.py
 │       │   ├── documents.py
-│       │   └── health.py
+│       │   ├── health.py
+│       │   └── sessions.py
 │       └── services/
 │           ├── __init__.py
 │           ├── embedding_service.py
@@ -261,10 +263,16 @@ proyecto-rag-chatbot/
 ├── frontend/
 │   └── index.html
 ├── data/
-│   ├── raw/.gitkeep
-│   └── processed/.gitkeep
+│   ├── raw/                  ← Documentos originales (PDF, DOCX)
+│   └── processed/
+│       └── chroma/           ← Base de datos vectorial (ChromaDB)
 ├── docs/
 │   ├── informe_tecnico.md
+│   ├── manual_instalacion.md
+│   ├── manual_usuario.md
+│   ├── presentacion_final.md
+│   ├── presentacion-rol1.tex
+│   ├── proceso_etl.md
 │   └── pruebas_api.md
 └── scripts/
     └── ingest.py

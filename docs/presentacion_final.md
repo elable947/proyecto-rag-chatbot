@@ -48,7 +48,7 @@ Usuario → Frontend (HTML/JS) → API REST (FastAPI) → Motor RAG
 
 - **21 documentos** del curso Azure
 - **Formatos:** PDF, DOCX
-- **377 chunks** generados
+- **883 chunks** generados
 - **Chunking:** RecursiveCharacterTextSplitter (1000 chars, 200 overlap)
 - **Metadatos:** documento, chunk_index por fragmento
 
