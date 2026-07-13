@@ -1,0 +1,367 @@
+% Compatible con OpenAI Prism (prism.openai.com)
+% Compilar con: pdflatex + shell-escape (no requiere paquetes externos)
+\documentclass[aspectratio=169, 11pt]{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
+
+\usepackage[T1]{fontenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{microtype}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric}
+
+\definecolor{mitred}{RGB}{163, 31, 52}
+\definecolor{mitnavy}{RGB}{20, 35, 60}
+\definecolor{mitgray}{RGB}{138, 139, 140}
+
+\setbeamercolor{title}{fg=white, bg=mitnavy}
+\setbeamercolor{frametitle}{fg=white, bg=mitnavy}
+\setbeamercolor{structure}{fg=mitred}
+\setbeamercolor{palette primary}{bg=mitnavy, fg=white}
+\setbeamercolor{palette secondary}{bg=mitred, fg=white}
+\setbeamercolor{palette tertiary}{bg=mitnavy, fg=white}
+\setbeamercolor{block title}{bg=mitnavy, fg=white}
+\setbeamercolor{footline}{fg=white, bg=mitnavy}
+
+\title[Chatbot RAG MIT Sloan]{\textbf{Chatbot Inteligente RAG} \\ Identidad MIT Sloan}
+\subtitle{Proyecto Final --- Modelos de Lenguaje (LLM)}
+\author[\textbf{Abel López --- Rol 1}]{\textbf{Líder Técnico y Arquitecto de Software} \\ Abel López \\ \texttt{@elable947}}
+\institute[MIT Sloan]{MIT Sloan School of Management}
+\date{\today}
+
+\begin{document}
+
+% ──────────────────────────────────────────
+\frame{\titlepage}
+
+% ──────────────────────────────────────────
+\begin{frame}{Índice}
+\tableofcontents
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Introducción al Proyecto}
+
+\begin{frame}{¿Qué es este proyecto?}
+\begin{itemize}
+    \item Sistema de \textbf{Pregunta-Respuesta} basado en \textbf{Retrieval-Augmented Generation (RAG)}
+    \item Responde preguntas sobre \textbf{Microsoft Azure, cloud computing, IA y certificaciones Azure}
+    \item Usa únicamente información de \textbf{documentos del curso} indexados en una base vectorial
+    \item No alucina ni usa conocimiento interno del modelo LLM
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{block}{Objetivo}
+Construir un chatbot educativo que asista a estudiantes del curso Azure de MIT Sloan, respondiendo con precisión respaldada por fuentes documentales reales.
+\end{block}
+\end{frame}
+
+% ──────────────────────────────────────────
+\begin{frame}{Equipo de Trabajo}
+\begin{table}
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Integrante} & \textbf{Rol} & \textbf{Área} \\
+\midrule
+Abel López & \textbf{Rol 1} - Líder Técnico y Arquitecto & Gestión, integración \\
+Jennifer Culquimboz & \textbf{Rol 2} - Ingesta de Datos & PDF, chunking, metadatos \\
+Fabricio Vasquez & \textbf{Rol 3} - Embeddings \& Vector DB & ChromaDB, BAAI/bge-m3 \\
+LINOX-EXIT & \textbf{Rol 4} - Motor RAG & RAG, integración LLM \\
+torrejonlolocj-code & \textbf{Rol 5} - Backend API & FastAPI, endpoints \\
+Nehemías Enoc & \textbf{Rol 6} - Frontend & UI/UX, identidad MIT Sloan \\
+enfermo2x & \textbf{Rol 7} - QA \& Documentación & Tests, informes \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\centering
+\textit{Trabajo en paralelo con ramas independientes y Pull Requests hacia \texttt{main}.}
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Responsabilidades del Rol 1}
+
+\begin{frame}{Rol 1: Líder Técnico y Arquitecto de Software}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Responsabilidades clave:}
+\begin{itemize}
+    \item Crear y gestionar el repositorio GitHub
+    \item Definir la arquitectura del sistema
+    \item Configurar la protección de la rama \texttt{main}
+    \item Crear Issues y asignarlos al equipo
+    \item Revisar y fusionar Pull Requests
+    \item Integración final y verificación
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Habilidades requeridas:}
+\begin{itemize}
+    \item Git y GitHub (ramas, PRs, merges)
+    \item Python + FastAPI
+    \item Arquitectura de sistemas RAG
+    \item Coordinación de equipo técnico
+    \item Resolución de conflictos (merge)
+    \item Pruebas de integración
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Flujo de Trabajo del Rol 1}
+\begin{enumerate}
+    \item \textbf{Inicialización:} Crear repositorio con estructura de carpetas, \texttt{.gitignore}, \texttt{pyproject.toml}, código base
+    \item \textbf{Protección:} Configurar reglas de protección en \texttt{main} (PR requerido, 1 approval)
+    \item \textbf{Planificación:} Crear 6 Issues en GitHub, uno por cada rol (Rol 2 al 7)
+    \item \textbf{Supervisión:} Revisar cada Pull Request, verificar calidad y consistencia
+    \item \textbf{Merge:} Fusionar PRs aprobados a \texttt{main}
+    \item \textbf{Integración:} Probar el sistema completo end-to-end
+\end{enumerate}
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Arquitectura del Sistema}
+
+\begin{frame}{Arquitectura General}
+\centering
+\begin{tikzpicture}[
+    node distance=1.2cm,
+    box/.style={rectangle, rounded corners, minimum width=2.8cm, minimum height=0.9cm, text centered, font=\small},
+    arrow/.style={thick, -{Stealth[scale=1.2]}},
+]
+
+\node[box, fill=mitnavy!80, text=white] (user) {Usuario};
+\node[box, fill=mitred!80, text=white, below=of user] (frontend) {Frontend HTML/JS};
+\node[box, fill=mitnavy!60, text=white, below=of frontend] (api) {API REST FastAPI};
+\node[box, fill=mitgray!60, below=of api] (rag) {Motor RAG};
+
+\node[box, fill=mitnavy!40, below left=1cm and 0.5cm of rag] (emb) {Embeddings \\ BAAI/bge-m3};
+\node[box, fill=mitred!40, below=of rag] (vectordb) {ChromaDB \\ Base Vectorial};
+\node[box, fill=mitnavy!40, below right=1cm and 0.5cm of rag] (llm) {LLM \\ DeepSeek/OpenAI};
+
+\draw[arrow] (user) -- (frontend);
+\draw[arrow] (frontend) -- (api);
+\draw[arrow] (api) -- (rag);
+\draw[arrow] (rag) -- (emb);
+\draw[arrow] (rag) -- (vectordb);
+\draw[arrow] (rag) -- (llm);
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Flujo RAG (Retrieval-Augmented Generation)}
+\centering
+\begin{tikzpicture}[
+    node distance=1cm,
+    proc/.style={rectangle, rounded corners, minimum width=2.5cm, minimum height=0.7cm, text centered, font=\footnotesize, fill=mitnavy!20},
+    arrow/.style={thick, -{Stealth[scale=1.2]}},
+]
+
+\node[proc, fill=mitnavy!80, text=white] (q) {Pregunta del usuario};
+\node[proc, below=of q] (norm) {Normalización \& Filtro de dominio};
+\node[proc, below=of norm] (embed) {Generar embedding};
+\node[proc, below=of embed] (search) {Búsqueda en ChromaDB};
+\node[proc, below=of search] (prompt) {Construir prompt con contexto};
+\node[proc, below=of prompt] (generate) {Generar respuesta (LLM)};
+\node[proc, below=of generate, fill=mitred!80, text=white] (resp) {Respuesta + Fuentes};
+
+\draw[arrow] (q) -- (norm);
+\draw[arrow] (norm) -- (embed);
+\draw[arrow] (embed) -- (search);
+\draw[arrow] (search) -- (prompt);
+\draw[arrow] (prompt) -- (generate);
+\draw[arrow] (generate) -- (resp);
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}{Tecnologías Utilizadas}
+\begin{table}
+\centering
+\small
+\begin{tabular}{lll}
+\toprule
+\textbf{Componente} & \textbf{Tecnología} & \textbf{Versión} \\
+\midrule
+Backend & Python + FastAPI & 3.10 / 0.115 \\
+Base vectorial & ChromaDB & 0.6 \\
+Embeddings & BAAI/bge-m3 & sentence-transformers \\
+Frontend & HTML + JavaScript & Vanilla \\
+LLM principal & DeepSeek Chat & deepseek-chat \\
+Gestor de paquetes & uv & 0.6 \\
+Base de datos & ChromaDB (local) & persistente \\
+Control de versiones & Git + GitHub & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\vspace{0.3cm}
+\textbf{Proveedores LLM soportados:} DeepSeek, OpenAI, Anthropic, Google Gemini, Ollama (local)
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Trabajo Realizado}
+
+\begin{frame}{Commits y Contribuciones del Rol 1}
+\begin{columns}[T]
+\column{0.55\textwidth}
+\textbf{Commits directos (8):}
+\begin{itemize}
+    \item \texttt{c0cb874} --- Inicializar estructura del proyecto
+    \item \texttt{7623518} --- Corregir estructura, DeepSeek, README
+    \item \texttt{df24f7c} --- Actualizar URL del repositorio
+    \item \texttt{44a505e} --- Flujo para agentes IA
+    \item \texttt{ca92806} --- Marcar tareas completadas
+    \item \texttt{71f2024} --- Actualizar README, .env.example
+    \item \texttt{c454578} --- Corregir tabla del equipo
+    \item \texttt{28bfd5c} --- Restaurar panel de fuentes RAG
+\end{itemize}
+
+\column{0.45\textwidth}
+\textbf{PRs revisados y fusionados (7):}
+\begin{itemize}
+    \item Rol 2: Ingesta de datos
+    \item Rol 3: Embeddings + Vector DB
+    \item Rol 4: Motor RAG
+    \item Rol 5: API REST
+    \item Rol 6: Frontend
+    \item Rol 7: Docs + despliegue
+    \item Fix: SDK Gemini
+\end{itemize}
+\end{columns}
+\vspace{0.3cm}
+\centering
+\textbf{Total: 24 commits en \texttt{main}, 7 PRs fusionados}
+\end{frame}
+
+\begin{frame}{Hitos del Proyecto}
+\begin{enumerate}
+    \item \textbf{Estructura base} --- Repositorio, carpetas, dependencias
+    \item \textbf{Ingesta} (Rol 2) --- 21 documentos, 883 chunks procesados
+    \item \textbf{Embeddings} (Rol 3) --- ChromaDB poblada con BAAI/bge-m3
+    \item \textbf{Motor RAG} (Rol 4) --- Pipeline de recuperación + generación
+    \item \textbf{API REST} (Rol 5) --- 6 endpoints, 12 tests automatizados
+    \item \textbf{Frontend} (Rol 6) --- Interfaz MIT Sloan, panel de fuentes RAG
+    \item \textbf{QA y Documentación} (Rol 7) --- Tests, informe técnico, presentación
+    \item \textbf{Integración final} (Rol 1) --- Pruebas end-to-end, correcciones
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{Correcciones y Mejoras Realizadas}
+Durante la integración final, se identificaron y corrigieron:
+
+\vspace{0.3cm}
+\begin{itemize}
+    \item \textbf{Panel de fuentes RAG oculto:} El Rol 7 lo eliminó en un commit; se restauró (\texttt{28bfd5c})
+    \item \textbf{Sin historial conversacional:} Cada mensaje era independiente; se agregó memoria de sesión con \texttt{deque}
+    \item \textbf{Alucinaciones del LLM:} El modelo usaba su conocimiento interno; se cambió el prompt para usar \textbf{exclusivamente el contexto} de la BD vectorial
+    \item \textbf{Saludos repetitivos:} El chatbot saludaba en cada mensaje; se agregó instrucción condicional ``NO saludes'' en follow-ups
+    \item \textbf{Falsos positivos en filtro de dominio:} ``vs'' y ``versus'' coincidían con preguntas como ``argentina vs suiza''; se eliminaron de las palabras clave
+    \item \textbf{Documentación:} README rediseñado con índice y guía de instalación detallada
+\end{itemize}
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Resultados Finales}
+
+\begin{frame}{Resultados Obtenidos}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\textbf{Métricas del proyecto:}
+\begin{itemize}
+    \item 21 documentos indexados
+    \item 883 chunks en ChromaDB
+    \item 11 tests pasados, 1 skip
+    \item 3.92s de ejecución de tests
+    \item 5 proveedores LLM soportados
+    \item 6 endpoints REST
+\end{itemize}
+
+\column{0.48\textwidth}
+\textbf{Comportamiento del chatbot:}
+\begin{itemize}
+    \item Responde solo con información de los documentos
+    \item Rechaza preguntas fuera del dominio Azure
+    \item Muestra fuentes documentales con % de similitud
+    \item Mantiene historial conversacional por sesión
+    \item No saluda en mensajes follow-up
+    \item Dice ``No encontré información'' si el contexto no contiene la respuesta
+\end{itemize}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Demo del Sistema}
+\centering
+\vspace{0.5cm}
+\textbf{Comandos para ejecutar el proyecto:}
+
+\vspace{0.3cm}
+\begin{columns}[T]
+\column{0.48\textwidth}
+\small
+\textbf{1. Iniciar backend:}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{gray!10}]
+cd backend
+uv run uvicorn app.main:app
+  --reload --port 8000
+\end{lstlisting}
+
+\column{0.48\textwidth}
+\small
+\textbf{2. Abrir frontend:}
+\begin{lstlisting}[basicstyle=\ttfamily\footnotesize, backgroundcolor=\color{gray!10}]
+cd frontend
+uv run python -m http.server 5500
+\end{lstlisting}
+
+Luego abrir \url{http://localhost:5500}
+\end{columns}
+
+\vspace{0.5cm}
+\textbf{Swagger UI:} \url{http://localhost:8000/docs}
+\end{frame}
+
+% ──────────────────────────────────────────
+\section{Conclusiones}
+
+\begin{frame}{Conclusiones}
+\begin{itemize}
+    \item Se logró un \textbf{sistema RAG completo y funcional} que responde preguntas sobre Azure usando exclusivamente los documentos del curso
+    \item La arquitectura \textbf{multi-LLM} permite elegir entre 5 proveedores sin cambiar código
+    \item El \textbf{flujo de trabajo con ramas y PRs} demostró ser efectivo para un equipo de 7 roles trabajando en paralelo
+    \item Las correcciones finales (\textbf{historial conversacional, contexto estricto, filtro de dominio}) mejoraron significativamente la calidad del chatbot
+    \item El proyecto está \textbf{listo para ser usado} por el profesor y los estudiantes
+\end{itemize}
+
+\vspace{0.5cm}
+\begin{block}{Repositorio}
+\centering
+\url{https://github.com/elable947/proyecto-rag-chatbot}
+\end{block}
+\end{frame}
+
+% ──────────────────────────────────────────
+\section*{}
+
+\begin{frame}
+\centering
+\vspace{1cm}
+{\Huge \textbf{¡Gracias!}}
+\vspace{0.5cm}
+
+{\large Chatbot RAG --- MIT Sloan}
+
+\vspace{0.3cm}
+\textit{``Aprender haciendo, preguntando y construyendo.''}
+
+\vspace{0.5cm}
+\small Abel López --- \texttt{@elable947}
+\end{frame}
+
+\end{document}
