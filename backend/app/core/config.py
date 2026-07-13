@@ -1,7 +1,12 @@
 """
 Configuración centralizada. Lee variables desde backend/.env
 """
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+from pydantic import model_validator
+
+BACKEND_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 class Settings(BaseSettings):
@@ -11,7 +16,7 @@ class Settings(BaseSettings):
 
     embedding_model: str = "BAAI/bge-m3"
 
-    vector_db_path: str = "./data/processed/chroma"
+    vector_db_path: str = ""
     vector_db_collection: str = "documentos_proyecto"
 
     top_k: int = 5
@@ -21,6 +26,11 @@ class Settings(BaseSettings):
     api_host: str = "0.0.0.0"
     api_port: int = 8000
     cors_origins: list[str] = ["http://localhost:5500"]
+
+    @model_validator(mode="after")
+    def _resolver_rutas(self) -> "Settings":
+        self.vector_db_path = str(BACKEND_DIR.parent / "data" / "processed" / "chroma")
+        return self
 
     class Config:
         env_file = ".env"

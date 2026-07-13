@@ -4,7 +4,6 @@ __pycache__/
 *.pyc
 .env
 data/processed/chroma/
-backend/data/
 .pytest_cache/
 .DS_Store
 node_modules/
