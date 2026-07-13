@@ -2,169 +2,176 @@
 
 ## Requisitos del sistema
 
-- **Sistema operativo:** Windows 10/11, macOS 12+ o Ubuntu 22.04+
-- **Python:** 3.10 o superior
-- **Git:** Para clonar el repositorio
-- **RAM:** 8 GB mínimo (16 GB recomendado para ejecutar el LLM local)
-- **Disco:** 5 GB de espacio disponible (incluye modelo de embeddings ~2GB y base vectorial)
+| Requisito | Mínimo | Recomendado |
+|---|---|---|
+| Sistema operativo | Windows 10, macOS 12, Ubuntu 22.04 | — |
+| Python | 3.10 | 3.10 o 3.11 |
+| RAM | 4 GB | 8 GB |
+| Disco | 5 GB libres | 10 GB |
+| Git | Cualquier versión | Última |
 
-## Instalación paso a paso
+---
 
-### 1. Clonar el repositorio
+## Paso 1: Clonar el repositorio
 
 ```bash
 git clone https://github.com/elable947/proyecto-rag-chatbot.git
 cd proyecto-rag-chatbot
 ```
 
-### 2. Instalar dependencias del backend
+---
+
+## Paso 2: Instalar dependencias
 
 ```bash
 cd backend
-
-# Opción A: Con uv (recomendado)
-uv init --python 3.10.4
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate    # Mac/Linux
-uv add -r requirements.txt
-
-# Opción B: Con pip
-python -m venv .venv
-.venv\Scripts\activate        # Windows
-# source .venv/bin/activate    # Mac/Linux
-pip install -r requirements.txt
+uv sync
 ```
 
-### 3. Configurar variables de entorno
+Esto crea el entorno virtual (`.venv`) e instala todas las dependencias desde `pyproject.toml`.
 
-```bash
-# Windows
-copy .env.example .env
+> Si no tienes `uv`, instálalo desde https://docs.astral.sh/uv/#installation  
+> Alternativa con pip: `python -m venv .venv` → activar → `pip install -r requirements.txt`
 
-# Mac/Linux
-cp .env.example .env
-```
+---
 
-Edita `backend/.env` con tu configuración:
+## Paso 3: Configurar variables de entorno
 
-```ini
-LLM_PROVIDER=ollama
-LLM_API_KEY=
-LLM_MODEL=qwen2:1.5b
+Crea el archivo `backend/.env` con este contenido (elige el proveedor que prefieras):
+
+```env
+# --- Proveedor LLM ---
+LLM_PROVIDER=deepseek         # deepseek | openai | anthropic | google | ollama
+LLM_API_KEY=sk-tu-api-key-aqui
+LLM_MODEL=deepseek-chat
+
+# --- Embeddings ---
 EMBEDDING_MODEL=BAAI/bge-m3
+
+# --- Base de datos vectorial ---
 VECTOR_DB_PATH=./data/processed/chroma
 VECTOR_DB_COLLECTION=documentos_proyecto
+
+# --- Parámetros RAG ---
 TOP_K=5
+CHUNK_SIZE=1000
+CHUNK_OVERLAP=200
+
+# --- API ---
+API_HOST=0.0.0.0
+API_PORT=8000
 ```
 
-### 4. Instalar Ollama (para LLM local)
+### Valores según proveedor
 
-Descarga Ollama desde: https://ollama.com/download
+| Proveedor | `LLM_PROVIDER` | `LLM_MODEL` | Cómo obtener la API Key |
+|---|---|---|---|
+| **DeepSeek** (recomendado) | `deepseek` | `deepseek-chat` | https://platform.deepseek.com → API Keys → Crear |
+| OpenAI | `openai` | `gpt-4o-mini` | https://platform.openai.com/api-keys |
+| Google Gemini | `google` | `gemini-2.0-flash` | https://aistudio.google.com/apikey ⚠️ Cuota limitada |
+| Anthropic | `anthropic` | `claude-3-haiku-20240307` | https://console.anthropic.com |
+| Ollama (local, gratuito) | `ollama` | `qwen2:1.5b` | No necesita key. Instalar: https://ollama.com + `ollama pull qwen2:1.5b` |
 
-```bash
-# Descargar el modelo Qwen2 1.5B
-ollama pull qwen2:1.5b
+---
 
-# Verificar que Ollama está funcionando
-ollama list
-```
+## Paso 4: Poblar la base de datos vectorial
 
-### 5. Colocar los documentos del curso
+**La base de datos ya está poblada** con 21 documentos (883 chunks) en `backend/data/processed/chroma/`. Puedes saltar este paso.
 
-1. Descarga los 21 documentos desde el enlace proporcionado por el docente
-2. Copia los archivos a la carpeta `data/raw/`
-3. Verifica que `data/raw/` contenga los archivos PDF/DOCX
-
-### 6. Ejecutar la ingesta de documentos
+Si necesitas reindexar o agregar documentos:
 
 ```bash
-# Desde la raíz del proyecto
+# 1. Descargar los 21 documentos originales:
+#    https://drive.google.com/file/d/1jSTZYo0YGBLr5GOkFtBC0ws2zLS2DLMo/view
+# 2. Descomprimir y copiar a data/raw/
+# 3. Ejecutar ingesta:
 uv run python scripts/ingest.py
-# O con pip:
-python scripts/ingest.py
 ```
 
-La primera ejecución descargará el modelo de embeddings BAAI/bge-m3 (~2GB). El proceso puede tomar varios minutos.
+> La primera ejecución descarga el modelo de embeddings BAAI/bge-m3 (~2 GB). Puede tomar varios minutos.
 
-### 7. Iniciar el backend
+---
+
+## Paso 5: Iniciar el servidor backend
 
 ```bash
 cd backend
 uv run uvicorn app.main:app --reload --port 8000
-# O con pip:
-python -m uvicorn app.main:app --reload --port 8000
 ```
 
-### 8. Abrir el frontend
-
-**Opción A:** Abrir directamente el archivo en el navegador
+Verifica que funcione:
 
 ```bash
-start frontend/index.html    # Windows
-# open frontend/index.html    # Mac
+curl http://localhost:8000/api/health
+# → {"estado":"ok","mensaje":"API del chatbot RAG operativa"}
 ```
 
-**Opción B:** Servir con un servidor HTTP simple
+---
+
+## Paso 6: Abrir el frontend
+
+**Opción A — Servir con HTTP (recomendado para evitar errores de CORS):**
 
 ```bash
 cd frontend
 uv run python -m http.server 5500
-# Abrir http://localhost:5500 en el navegador
 ```
+
+Abrir: http://localhost:5500
+
+**Opción B — Abrir directamente:**
+
+| Sistema | Comando |
+|---|---|
+| Windows | `start frontend/index.html` |
+| macOS | `open frontend/index.html` |
+| Linux | `xdg-open frontend/index.html` |
+
+> ⚠️ Desde `file://` algunos navegadores bloquean peticiones fetch. Si ves "Failed to fetch", usa la Opción A.
+
+---
 
 ## Verificar la instalación
 
-### Probar health check
-
 ```bash
+# Health check
 curl http://localhost:8000/api/health
-```
 
-Respuesta esperada:
-```json
-{ "estado": "ok", "mensaje": "API del chatbot RAG operativa" }
-```
-
-### Probar el chatbot
-
-```bash
+# Probar chat
 curl -X POST http://localhost:8000/api/chat \
   -H "Content-Type: application/json" \
-  -d '{"pregunta": "¿Qué es Azure?", "session_id": "test", "top_k": 3}'
+  -d '{"pregunta":"¿Qué es Microsoft Azure?","session_id":"test"}'
+
+# Ejecutar tests
+cd backend && uv run pytest -v
+# → 11 passed, 1 skipped
 ```
 
-### Ejecutar pruebas automatizadas
+---
 
-```bash
-cd backend
-uv run pytest -v
-# O con pip:
-python -m pytest -v
-```
+## Solución de problemas
 
-Todas las pruebas deben pasar (11 passed, 1 skipped).
+| Problema | Causa | Solución |
+|---|---|---|
+| `No module named 'app'` | Estás fuera de `backend/` o sin `.venv` | `cd backend` y activar entorno virtual |
+| `Failed to fetch` en frontend | CORS: abriste desde `file://` | Usa `http.server 5500` (Opción A) |
+| `429 RESOURCE_EXHAUSTED` | Cuota gratis de Gemini agotada | Cambia a DeepSeek u otro proveedor |
+| Conexión rechazada en :8000 | Backend no iniciado | Ejecuta `uv run uvicorn...` |
+| `uv` no encontrado | `uv` no instalado | `pip install uv` o instala desde astral.sh |
+| Ollama no responde | Ollama no corriendo | `ollama serve` en otra terminal |
+| Modelo de embeddings no se descarga | Espacio o conectividad | Verifica disco y conexión a internet |
+| Error de permisos en Windows | PowerShell sin admin | Ejecuta como Administrador |
 
-## Solución de problemas comunes
-
-| Problema | Solución |
-|---|---|
-| `ModuleNotFoundError: No module named 'app'` | Activar el entorno virtual y estar en la carpeta `backend/` |
-| `No se encontraron documentos en data/raw/` | Copiar los 21 documentos del curso Azure a `data/raw/` |
-| Conexión rechazada en frontend | Verificar que el backend esté corriendo en `http://localhost:8000` |
-| Error de CORS en frontend | Agregar el puerto del frontend en `CORS_ORIGINS` del `.env` |
-| Ollama no responde | Ejecutar `ollama serve` en otra terminal |
-| Memoria insuficiente | Usar modelo más pequeño: `ollama pull qwen2:0.5b` |
-| pytest no encuentra pruebas | Ejecutar desde `backend/` con el entorno virtual activado |
-| Error de permisos en Windows | Ejecutar PowerShell como administrador |
+---
 
 ## URLs de referencia
 
 | Recurso | URL |
 |---|---|
-| API Docs (Swagger) | http://localhost:8000/docs |
-| Frontend | http://localhost:5500 |
+| Swagger UI (documentación API) | http://localhost:8000/docs |
+| Frontend del chatbot | http://localhost:5500 |
 | Repositorio GitHub | https://github.com/elable947/proyecto-rag-chatbot |
-| Documentación FastAPI | https://fastapi.tiangolo.com/ |
-| Documentación ChromaDB | https://docs.trychroma.com/ |
-| Ollama | https://ollama.com/download/windows |
-| Python | https://www.python.org/downloads/ |
+| Documentos del curso (Google Drive) | https://drive.google.com/file/d/1jSTZYo0YGBLr5GOkFtBC0ws2zLS2DLMo/view |
+| DeepSeek API | https://platform.deepseek.com |
+| Ollama | https://ollama.com |
+| Guía de desarrollo por roles | `guia_desarrollo_por_roles.md` |
