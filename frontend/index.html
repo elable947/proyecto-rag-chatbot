@@ -560,6 +560,29 @@
         border-radius: 2px;
     }
 
+    /* Fuentes documentales (Top 5) */
+    .sources-section {
+        margin: 8px 0 2px 0;
+        font-size: 11px;
+        color: var(--mit-gray);
+        border-top: 1px solid #e0e0e0;
+        padding-top: 6px;
+    }
+    .sources-section strong {
+        font-size: 11px;
+    }
+    .sources-section ol {
+        margin: 4px 0 0 16px;
+        padding: 0;
+    }
+    .sources-section li {
+        margin-bottom: 2px;
+        line-height: 1.3;
+    }
+    .sources-section .sim-score {
+        opacity: 0.6;
+    }
+
     /* Botón de reintentar tras un error */
     .retry-btn {
         border-color: var(--mit-red);
@@ -629,7 +652,10 @@
 
     body.dark-mode .message-time { color: #8b94a5; }
 
-
+    body.dark-mode .sources-section {
+        border-top-color: #2a3c5e;
+        color: #8b94a5;
+    }
 
     body.dark-mode .typing-indicator {
         background: #1c2d4a;
@@ -849,6 +875,22 @@
         bubble.className = `chat-message ${msg.type}-message`;
         bubble.innerHTML = `${msg.text}<span class="message-time">${msg.time}</span>`;
         container.appendChild(bubble);
+
+        // ── Mostrar Top 5 fuentes documentales ──
+        if (msg.fuentes && msg.fuentes.length > 0) {
+            const srcDiv = document.createElement('div');
+            srcDiv.className = 'sources-section';
+            let srcHtml = '<strong>📄 Fuentes consultadas:</strong><ol>';
+            const maxFuentes = Math.min(msg.fuentes.length, 5);
+            for (let i = 0; i < maxFuentes; i++) {
+                const f = msg.fuentes[i];
+                const nomDoc = f.documento.length > 50 ? f.documento.substring(0, 47) + '...' : f.documento;
+                srcHtml += `<li>${escapeHtml(nomDoc)} <span class="sim-score">(${(f.similitud * 100).toFixed(0)}%)</span></li>`;
+            }
+            srcHtml += '</ol>';
+            srcDiv.innerHTML = srcHtml;
+            container.appendChild(srcDiv);
+        }
 
         if (msg.quickReplies && msg.quickReplies.length) {
             const qr = document.createElement('div');
