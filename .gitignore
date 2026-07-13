@@ -9,3 +9,5 @@ backend/data/
 .DS_Store
 node_modules/
 *.log
+old_frontend.html
+docs/presentacion-rol1.tex
