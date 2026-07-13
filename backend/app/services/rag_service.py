@@ -2,9 +2,13 @@
 Servicio principal del motor RAG.
 """
 import re
+from collections import deque
 
 from app.core.config import settings
 from app.services import embedding_service, vector_store_service, llm_service
+
+MEMORIA_SESIONES: dict[str, deque] = {}
+MAX_HISTORIAL = 6
 
 
 PALABRAS_CLAVE_AZURE = {
@@ -35,7 +39,7 @@ PALABRAS_CLAVE_AZURE = {
     "metrica", "métrica", "accuracy", "precision", "exactitud",
     "modelo de fundamentos", "fundación", "foundation model",
     "aws", "amazon", "gcp", "google cloud", "oracle", "ibm",
-    "comparacion", "comparación", "diferencia", "vs", "versus",
+    "comparacion", "comparación", "diferencia",
 }
 
 SALUDOS = {"hola", "buenos dias", "buenas tardes", "buenas noches", "hello", "hi", "hey", "buen dia", "buenas", "saludos"}
@@ -102,17 +106,28 @@ def es_pregunta_azure(pregunta: str) -> bool:
 
 
 def responder_pregunta(pregunta: str, top_k: int, session_id: str) -> dict:
+    if session_id not in MEMORIA_SESIONES:
+        MEMORIA_SESIONES[session_id] = deque(maxlen=MAX_HISTORIAL)
+        es_primera = True
+    else:
+        es_primera = False
+
     saludo_respuesta = detectar_saludo(pregunta)
     if saludo_respuesta:
+        MEMORIA_SESIONES[session_id].append({"rol": "user", "texto": pregunta})
+        MEMORIA_SESIONES[session_id].append({"rol": "assistant", "texto": saludo_respuesta})
         return {"respuesta": saludo_respuesta, "fuentes": [], "modelo_usado": settings.llm_model}
 
     agradecimiento_respuesta = detectar_agradecimiento(pregunta)
     if agradecimiento_respuesta:
+        MEMORIA_SESIONES[session_id].append({"rol": "user", "texto": pregunta})
+        MEMORIA_SESIONES[session_id].append({"rol": "assistant", "texto": agradecimiento_respuesta})
         return {"respuesta": agradecimiento_respuesta, "fuentes": [], "modelo_usado": settings.llm_model}
 
     pregunta_normalizada = normalizar_pregunta(pregunta)
 
     if not es_pregunta_azure(pregunta):
+        MEMORIA_SESIONES[session_id].append({"rol": "user", "texto": pregunta})
         return {
             "respuesta": "Solo puedo responder preguntas relacionadas con el curso Microsoft Azure y sus servicios. Por favor, haz una pregunta sobre Azure, cloud computing, inteligencia artificial o temas del curso.",
             "fuentes": [],
@@ -130,31 +145,49 @@ def responder_pregunta(pregunta: str, top_k: int, session_id: str) -> dict:
         f"[Fuente: {r['documento']}]\n{r['fragmento']}" for r in resultados
     )
 
-    prompt = construir_prompt(pregunta, contexto, max_sim)
+    historial = list(MEMORIA_SESIONES[session_id])
+    prompt = construir_prompt(pregunta, contexto, max_sim, historial, es_primera)
     respuesta = llm_service.generar_respuesta(prompt)
+
+    MEMORIA_SESIONES[session_id].append({"rol": "user", "texto": pregunta})
+    MEMORIA_SESIONES[session_id].append({"rol": "assistant", "texto": respuesta})
 
     return {"respuesta": respuesta, "fuentes": resultados, "modelo_usado": settings.llm_model}
 
 
-def construir_prompt(pregunta: str, contexto: str, max_sim: float) -> str:
+def construir_prompt(pregunta: str, contexto: str, max_sim: float, historial: list, es_primera: bool) -> str:
     calidad = ""
     if contexto.strip():
         if max_sim > 0.4:
-            calidad = "\nLos fragmentos siguientes tienen alta relevancia con la pregunta del usuario. Úsalos como fuente principal para tu respuesta."
+            calidad = "\nLos fragmentos siguientes tienen alta relevancia con la pregunta del usuario. Son tu única fuente de información para responder."
         elif max_sim > 0.15:
-            calidad = "\nLos fragmentos siguientes tienen cierta relevancia con la pregunta. Puedes complementarlos con tu conocimiento general sobre Azure."
+            calidad = "\nLos fragmentos siguientes tienen cierta relevancia con la pregunta. Son tu única fuente de información para responder."
         else:
-            calidad = "\nLos fragmentos siguientes tienen baja relevancia pero pueden servir de referencia. Usa principalmente tu conocimiento general sobre Azure para responder."
+            calidad = "\nLos fragmentos siguientes tienen baja relevancia. Si no contienen la respuesta, indícalo al usuario."
+
+    historial_str = ""
+    if historial:
+        partes = []
+        for msg in historial:
+            rol = "Usuario" if msg["rol"] == "user" else "Asistente"
+            partes.append(f"{rol}: {msg['texto']}")
+        historial_str = "\n".join(partes) + "\n"
+
+    saludo_instruccion = ""
+    if not es_primera:
+        saludo_instruccion = "- NO saludes ni te presentes. Responde directamente a la pregunta como continuación de la conversación."
 
     return f"""Eres AzureCourseBot, un asistente virtual experto en Microsoft Azure del MIT Sloan School of Management.
 
-Directrices:
+REGLAS ESTRICTAS:
 - Responde SIEMPRE en español, con un tono amable, profesional y conversacional.
-- Para preguntas relacionadas con Azure, cloud computing, IA, certificaciones y tecnología Microsoft: responde de forma completa y útil combinando el contexto documental con tu conocimiento.
-- Si la pregunta compara Azure con otros servicios (AWS, GCP, etc.), responde con la mejor información disponible. Si el contexto documental no cubre la comparación, usa tu conocimiento general para ayudar al usuario.
-- Si la pregunta es claramente trivial o fuera del ámbito del curso (clima, deportes, famosos, política, entretenimiento), responde educadamente que solo puedes ayudar con temas del curso Azure.
-- Sé conversacional, natural y servicial, como un experto que explica con paciencia a un estudiante.{calidad}
+- SOLO puedes usar la información del Contexto recuperado de los documentos del curso para responder. NO uses tu conocimiento interno o entrenamiento previo.
+- Si el Contexto no contiene información suficiente para responder la pregunta, di: "No encontré información sobre eso en los documentos del curso." y sugiere preguntar sobre Azure.
+- Si la pregunta es sobre clima, deportes, famosos, política, entretenimiento o cualquier tema NO relacionado con Azure, responde educadamente que solo puedes ayudar con temas del curso Azure.
+- Para preguntas sobre Azure, cloud computing, IA, certificaciones y tecnología Microsoft: responde ÚNICAMENTE con la información del Contexto. No inventes ni agregues datos que no estén en los fragmentos.{calidad}{saludo_instruccion}
 
+{"Historial de la conversación:" if historial_str else ""}
+{historial_str}
 Contexto recuperado de los documentos del curso:
 {contexto}
 
